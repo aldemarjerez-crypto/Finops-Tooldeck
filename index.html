@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinOps Core | Automatizaciones</title>
+    <style>
+        :root {
+            --bg-body: #f4f5f7;
+            --bg-card: #ffffff;
+            --text-navy: #0e1337;
+            --text-gray: #4a4f6a;
+            --bold-title-color: #c41c49;
+            --bold-btn-color: #ff8fab;
+            --bold-btn-hover: #ff7596;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 40px;
+            color: var(--text-navy);
+        }
+
+        .header-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--bold-title-color);
+        }
+
+        .header-section span {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .main-card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            padding: 30px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            max-width: 800px;
+        }
+
+        .main-card h2 {
+            color: var(--text-navy);
+            margin-top: 0;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .main-card p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .tool-item:hover {
+            border-color: #cbd5e1;
+        }
+
+        .tool-item h3 {
+            margin: 0 0 10px 0;
+            color: var(--text-navy);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-item p {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .btn-bold {
+            background-color: var(--bold-btn-color);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+
+        .btn-bold:hover {
+            background-color: var(--bold-btn-hover);
+        }
+
+        .badge {
+            background-color: #e6f4ea;
+            color: #1e8e3e;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-section">
+        <span>&lt;</span> FinOps Core
+    </div>
+
+    <div class="main-card">
+        <h2>Panel de Automatizaciones de Conciliación</h2>
+        <p>Selecciona la herramienta que deseas utilizar para procesar las transacciones de hoy.</p>
+
+        <div class="tools-grid">
+            <div class="tool-item">
+                <h3>🤖 Valenbot <span class="badge">Activo</span></h3>
+                <p>Conciliación automática de recaudos PSE. Valida ciclos, cuadra valores, notifica a Slack y genera el entregable seguro.</p>
+                <a href="https://valenbot-pse-cashin-settlement-625642864594.europe-west1.run.app/" target="_blank" class="btn-bold">Abrir herramienta</a>
+            </div>
+
+            <div class="tool-item" style="opacity: 0.6; border-style: dashed;">
+                <h3>⚙️ Próximo Bot</h3>
+                <p>Módulo en desarrollo para futuras automatizaciones financieras del equipo.</p>
+                <button class="btn-bold" style="background-color: #ccc; cursor: not-allowed;" disabled>Próximamente</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
