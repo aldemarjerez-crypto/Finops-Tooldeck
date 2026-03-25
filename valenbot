@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valenbot | Ops Deck</title>
+    <style>
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 20px; margin: 0; }
+        .nav-bar { max-width: 600px; margin: 0 auto 20px auto; }
+        .back-btn { color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: bold; transition: color 0.2s; }
+        .back-btn:hover { color: #f8fafc; }
+        
+        .container { max-width: 600px; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; margin: auto; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+        h2 { color: #3b82f6; text-align: center; margin-top: 0; }
+        label { font-weight: bold; margin-top: 15px; display: block; color: #cbd5e1; font-size: 0.9rem; }
+        input[type="text"], input[type="date"], input[type="file"] { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 5px; background-color: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white; box-sizing: border-box; }
+        input[type="file"] { padding: 8px; color: #94a3b8; }
+        
+        button { width: 100%; background-color: #3b82f6; color: white; padding: 15px; margin-top: 20px; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+        button:hover { background-color: #2563eb; }
+        button:disabled { background-color: #475569; cursor: not-allowed; color: #94a3b8; }
+        
+        .row { display: flex; gap: 15px; }
+        .col { flex: 1; }
+        #mensaje { margin-top: 20px; text-align: center; font-weight: bold; padding: 10px; border-radius: 6px; display: none; }
+        .success { background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; }
+        .error { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="index.html" class="back-btn">← Volver al Hub</a>
+    </div>
+
+    <div class="container">
+        <h2>🤖 Valenbot: Conciliación PSE</h2>
+        <form id="valenbotForm">
+            <div class="row">
+                <div class="col"><label>Analista:</label><input type="text" name="analista" value="Bot de Conciliación"></div>
+                <div class="col"><label>Fecha de corte:</label><input type="date" name="fecha_corte" required></div>
+            </div>
+            
+            <label>📁 Sube el archivo de Recaudos (PSE):</label>
+            <input type="file" name="archivo_recaudos" accept=".csv, .xlsx" required>
+
+            <label>📁 Sube el extracto del Banco:</label>
+            <input type="file" name="archivo_banco" accept=".csv, .xlsx" required>
+            
+            <button type="submit" id="btnEnviar">🤖 Conciliar y Notificar a Slack</button>
+        </form>
+        <div id="mensaje"></div>
+    </div>
+
+    <script>
+        // Aquí luego pondrás la URL de Cloud Functions de Valenbot cuando lo subamos a la nube
+        const CLOUD_FUNCTION_URL = ""; 
+
+        document.getElementById('valenbotForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); 
+
+            const btn = document.getElementById('btnEnviar');
+            const mensajeDiv = document.getElementById('mensaje');
+
+            if (!CLOUD_FUNCTION_URL) {
+                mensajeDiv.style.display = "block";
+                mensajeDiv.innerText = "⚠️ Valenbot aún no está conectado a la nube. ¡Configura la URL en el código!";
+                mensajeDiv.className = "error";
+                return;
+            }
+
+            // ... (El resto de la lógica irá aquí cuando conectemos a Valenbot) ...
+            btn.disabled = true;
+            btn.innerText = "⏳ Procesando...";
+            
+            // Simulación rápida
+            setTimeout(() => {
+                mensajeDiv.style.display = "block";
+                mensajeDiv.innerText = "✅ Conciliación enviada con éxito.";
+                mensajeDiv.className = "success";
+                btn.disabled = false;
+                btn.innerText = "🤖 Conciliar y Notificar a Slack";
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
