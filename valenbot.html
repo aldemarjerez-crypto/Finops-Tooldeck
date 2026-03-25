@@ -151,6 +151,54 @@
                 btn.innerText = "Validar y Procesar Valenbot";
             }, 3000);
         });
-    </script>
+    const CLOUD_RUN_URL = "https://valenbot-pse-cashin-settlement-625642864594.europe-west1.run.app/process"; 
+
+    document.getElementById('valenbotForm').addEventListener('submit', async function(e) {
+        e.preventDefault(); 
+        
+        const btn = document.getElementById('btnEnviar');
+        const mensajeDiv = document.getElementById('mensaje');
+        const formData = new FormData(this);
+
+        // UI: Bloquear botón y mostrar carga
+        btn.disabled = true;
+        btn.innerText = "⏳ Procesando ciclos en Google Cloud...";
+        mensajeDiv.style.display = "none";
+
+        try {
+            const response = await fetch(CLOUD_RUN_URL, {
+                method: 'POST',
+                body: formData // Esto envía archivos y campos de texto automáticamente
+            });
+
+            if (response.ok) {
+                // Si el servidor devuelve un archivo (el CSV conciliado)
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "conciliacion_finalizada.csv";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
+                mensajeDiv.style.display = "block";
+                mensajeDiv.className = "success";
+                mensajeDiv.innerText = "✅ ¡Procesado! El archivo se descargó y el reporte se envió a Slack.";
+            } else {
+                const errorText = await response.text();
+                throw new Error(errorText || "Error en el servidor");
+            }
+        } catch (error) {
+            console.error(error);
+            mensajeDiv.style.display = "block";
+            mensajeDiv.className = "error";
+            mensajeDiv.innerText = "❌ Error: " + error.message;
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Validar y Procesar Valenbot";
+        }
+    });
+</script>
 </body>
 </html>
