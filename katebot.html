@@ -3,30 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katebot | Conciliador</title>
+    <title>Katebot | Conciliador de Extractos</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0f172a; color: #f8fafc; padding: 20px; margin: 0; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 20px; margin: 0; }
         .nav-bar { max-width: 500px; margin: 0 auto 20px auto; }
-        .back-btn { color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: bold; }
-        .container { max-width: 500px; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; margin: auto; text-align: center; }
-        h2 { color: #10b981; margin-top: 0; }
-        .upload-area { border: 2px dashed #475569; padding: 40px; border-radius: 12px; margin: 20px 0; cursor: pointer; transition: 0.3s; }
+        .back-btn { color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: bold; transition: color 0.2s; }
+        .back-btn:hover { color: #f8fafc; }
+        
+        .container { max-width: 500px; background: #1e293b; padding: 40px; border-radius: 16px; border: 1px solid #334155; margin: auto; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        h2 { color: #10b981; margin-top: 0; font-size: 1.8rem; }
+        p { color: #94a3b8; line-height: 1.6; }
+        
+        .upload-area { border: 2px dashed #475569; padding: 50px 20px; border-radius: 12px; margin: 30px 0; cursor: pointer; transition: all 0.3s ease; background: rgba(15, 23, 42, 0.3); }
         .upload-area:hover { border-color: #10b981; background: rgba(16, 185, 129, 0.05); }
+        
         input[type="file"] { display: none; }
-        button { width: 100%; background-color: #10b981; color: white; padding: 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        button:disabled { background-color: #475569; }
-        #mensaje { margin-top: 20px; padding: 10px; border-radius: 6px; display: none; }
-        .success { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; }
+        
+        button { width: 100%; background-color: #10b981; color: white; padding: 16px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background-color: #059669; }
+        button:disabled { background-color: #475569; cursor: not-allowed; opacity: 0.7; }
+        
+        #mensaje { margin-top: 25px; padding: 15px; border-radius: 8px; display: none; font-size: 0.95rem; line-height: 1.4; }
+        .success { background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; }
+        .error { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
     </style>
 </head>
 <body>
-    <div class="nav-bar"><a href="index.html" class="back-btn">← Volver al Hub</a></div>
+
+    <div class="nav-bar">
+        <a href="index.html" class="back-btn">← Volver al Hub</a>
+    </div>
+
     <div class="container">
         <h2>👩‍💻 Katebot: Conciliación</h2>
-        <p style="color: #94a3b8;">Sube el extracto del BanRep para iniciar el cruce.</p>
+        <p>Sube el extracto del BanRep. Katebot cruzará los datos con las expectativas de Isa y notificará a Slack.</p>
         
-        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-            <p id="fileName">📁 Haz clic o arrastra el archivo aquí</p>
+        <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <div style="font-size: 3rem; margin-bottom: 10px;">📊</div>
+            <p id="fileName">Haz clic o selecciona el archivo Excel aquí</p>
             <input type="file" id="fileInput" accept=".xlsx, .xls">
         </div>
 
@@ -35,21 +49,24 @@
     </div>
 
     <script>
-        const URL_UPLOAD = "TU_NUEVA_URL_DE_FUNCION_SUBIDA"; // La crearemos en el paso 2
+        // URL de tu Cloud Function conectada al Bucket
+        const URL_UPLOAD = "https://katebot-loading-file-625642864594.europe-west1.run.app";
+        
         const fileInput = document.getElementById('fileInput');
         const btn = document.getElementById('btnSubir');
         const msg = document.getElementById('mensaje');
 
         fileInput.onchange = () => {
             if(fileInput.files[0]) {
-                document.getElementById('fileName').innerText = "✅ " + fileInput.files[0].name;
+                document.getElementById('fileName').innerHTML = `<strong>Archivo listo:</strong><br>${fileInput.files[0].name}`;
                 btn.disabled = false;
             }
         };
 
         btn.onclick = async () => {
             btn.disabled = true;
-            btn.innerText = "⏳ Subiendo archivo...";
+            btn.innerText = "⏳ Subiendo extracto...";
+            msg.style.display = "none";
             
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
@@ -61,16 +78,20 @@
                 });
                 
                 if (response.ok) {
-                    msg.innerText = "✅ ¡Archivo en el bucket! Katebot empezará a trabajar ahora mismo.";
+                    msg.innerHTML = "<strong>✅ ¡Archivo procesado!</strong><br>Katebot ha iniciado el cruce de datos. Revisa Slack en un momento.";
                     msg.className = "success";
                     msg.style.display = "block";
+                    fileInput.value = ""; 
+                    btn.innerText = "🚀 Subir y Conciliar";
+                } else {
+                    throw new Error();
                 }
             } catch (error) {
-                msg.innerText = "❌ Error al subir. Verifica la conexión.";
+                msg.innerHTML = "<strong>❌ Error al subir</strong><br>Verifica que la función tenga habilitado CORS o intenta de nuevo.";
+                msg.className = "error";
                 msg.style.display = "block";
-            } finally {
                 btn.disabled = false;
-                btn.innerText = "🚀 Subir y Conciliar";
+                btn.innerText = "🚀 Reintentar";
             }
         };
     </script>
