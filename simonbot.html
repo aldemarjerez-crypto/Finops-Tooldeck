@@ -50,7 +50,7 @@
             </div>
             <div class="row">
                 <div class="col"><label>Base Apple ($):</label><input type="number" step="0.01" name="apple" value="1000000"></div>
-                <div class="col"><label>Base Credibanco ($):</label><input type="number" step="0.01" name="credibanco" value="1000000"></div>
+                <div class="col"><label>Cantidad TRX Credibanco:</label><input type="number" step="1" name="credibanco" value="0"></div>
             </div>
             <label>Total Fogafín ($):</label><input type="number" step="0.01" name="fogafin" value="151602862.51">
             
@@ -81,6 +81,9 @@
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer super_secreto_simon_2026' // <--- LLAVE DE SEGURIDAD AGREGADA
+                    },
                     body: formData
                 });
                 
