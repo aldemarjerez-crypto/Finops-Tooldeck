@@ -14,13 +14,18 @@
         h2 { color: #ec4899; margin-top: 0; font-size: 1.8rem; }
         p { color: #94a3b8; line-height: 1.6; }
         
-        button { width: 100%; background-color: #ec4899; color: white; padding: 18px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 20px;}
+        .form-group { text-align: left; margin: 25px 0 15px 0; }
+        label { display: block; color: #cbd5e1; font-weight: bold; margin-bottom: 8px; font-size: 0.95rem; }
+        select { width: 100%; padding: 14px; background-color: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 1rem; cursor: pointer; }
+        
+        button { width: 100%; background-color: #ec4899; color: white; padding: 18px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px;}
         button:hover { background-color: #db2777; }
         button:disabled { background-color: #475569; cursor: not-allowed; opacity: 0.7; }
         
         #mensaje { margin-top: 25px; padding: 15px; border-radius: 8px; display: none; font-size: 0.95rem; line-height: 1.4; }
         .success { background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; }
         .error { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
+        .warning { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid #f59e0b; }
     </style>
 </head>
 <body>
@@ -31,9 +36,20 @@
 
     <div class="container">
         <h2>💰 Isabot: Treasury</h2>
-        <p>Isabot se conectará al Drive para buscar las monetizaciones con fecha de hoy.</p>
+        <p>Isabot se conectará al Drive para buscar las monetizaciones con fecha de hoy y evitará duplicados.</p>
         
         <div style="font-size: 4.5rem; margin: 20px 0;">📊☁️</div>
+
+        <div class="form-group">
+            <label for="analista">¿Quién ejecuta el proceso hoy?</label>
+            <select id="analista" required>
+                <option value="">Selecciona tu nombre...</option>
+                <option value="María I. Caicedo">María I. Caicedo</option>
+                <option value="Andrés Felipe (Alde)">Andrés Felipe (Alde)</option>
+                <option value="Kate Adies">Kate Adies</option>
+                <option value="Otro FinOps">Otro (Equipo FinOps)</option>
+            </select>
+        </div>
 
         <button id="btnProcesar">🚀 Procesar Registros del Día</button>
         <div id="mensaje"></div>
@@ -43,19 +59,34 @@
         const URL_ISA = "https://isabot-treasury-625642864594.europe-west1.run.app";
         const btn = document.getElementById('btnProcesar');
         const msg = document.getElementById('mensaje');
+        const analistaSelect = document.getElementById('analista');
 
         btn.onclick = async () => {
+            const usuario = analistaSelect.value;
+            
+            // Validación para que no lo lancen sin poner su nombre
+            if (!usuario) {
+                msg.innerHTML = "<strong>⚠️ Espera un momento</strong><br>Por favor, selecciona tu nombre en la lista antes de continuar.";
+                msg.className = "warning";
+                msg.style.display = "block";
+                return;
+            }
+
             btn.disabled = true;
             btn.innerText = "⏳ Leyendo Google Sheets...";
             msg.style.display = "none";
             
             try {
-                // Ya no mandamos archivo, solo avisamos que empiece
-                const response = await fetch(URL_ISA, { method: 'POST' });
+                // Ahora enviamos el nombre del usuario a la función
+                const response = await fetch(URL_ISA, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario: usuario })
+                });
                 const result = await response.json();
                 
                 if (response.ok) {
-                    msg.innerHTML = `<strong>✅ ¡Lote Procesado!</strong><br>${result.mensaje}`;
+                    msg.innerHTML = `<strong>✅ ¡Completado!</strong><br>${result.mensaje}`;
                     msg.className = "success";
                     msg.style.display = "block";
                 } else {
