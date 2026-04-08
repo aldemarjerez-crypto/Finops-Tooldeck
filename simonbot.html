@@ -13,7 +13,7 @@
         .container { max-width: 600px; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; margin: auto; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
         h2 { color: #3b82f6; text-align: center; margin-top: 0; }
         label { font-weight: bold; margin-top: 15px; display: block; color: #cbd5e1; font-size: 0.9rem; }
-        input[type="text"], input[type="number"], input[type="file"] { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 5px; background-color: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white; box-sizing: border-box; }
+        input[type="text"], input[type="password"], input[type="number"], input[type="file"] { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 5px; background-color: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white; box-sizing: border-box; }
         input[type="file"] { padding: 8px; color: #94a3b8; }
         
         button { width: 100%; background-color: #3b82f6; color: white; padding: 15px; margin-top: 20px; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
@@ -36,23 +36,27 @@
     <div class="container">
         <h2>🚀 Simon Bot: Provisión</h2>
         <form id="simonForm">
+            <div class="row" style="background: rgba(15, 23, 42, 0.4); padding: 10px; border-radius: 8px; border: 1px solid #475569;">
+                <div class="col"><label style="margin-top: 0;">👤 Analista:</label><input type="text" name="analista" placeholder="Ej: Tu Nombre" required></div>
+                <div class="col"><label style="margin-top: 0;">🔐 PIN de Seguridad:</label><input type="password" name="pin" placeholder="****" required></div>
+            </div>
+
             <div class="row">
-                <div class="col"><label>Analista:</label><input type="text" name="analista" value="Bot Contable"></div>
                 <div class="col"><label>TRX API Calls:</label><input type="number" name="api_calls" value="400000"></div>
-            </div>
-            <div class="row">
                 <div class="col"><label>TRX Bronce QR:</label><input type="number" name="bronce" value="1218375"></div>
+            </div>
+            <div class="row">
                 <div class="col"><label>TRX Otros QR:</label><input type="number" name="otros" value="938569"></div>
-            </div>
-            <div class="row">
                 <div class="col"><label>Base Galileo ($):</label><input type="number" step="0.01" name="galileo" value="21000"></div>
-                <div class="col"><label>Base Servibanca ($):</label><input type="number" step="0.01" name="servibanca" value="666.67"></div>
             </div>
             <div class="row">
+                <div class="col"><label>Base Servibanca ($):</label><input type="number" step="0.01" name="servibanca" value="666.67"></div>
                 <div class="col"><label>Base Apple ($):</label><input type="number" step="0.01" name="apple" value="1000000"></div>
-                <div class="col"><label>Cantidad TRX Credibanco:</label><input type="number" step="1" name="credibanco" value="0"></div>
             </div>
-            <label>Total Fogafín ($):</label><input type="number" step="0.01" name="fogafin" value="151602862.51">
+            <div class="row">
+                <div class="col"><label>Cantidad TRX Credibanco:</label><input type="number" step="1" name="credibanco" value="0"></div>
+                <div class="col"><label>Total Fogafín ($):</label><input type="number" step="0.01" name="fogafin" value="151602862.51"></div>
+            </div>
             
             <label>📁 Sube el archivo CSV del mes:</label>
             <input type="file" name="archivo_csv" id="archivo_csv" accept=".csv" required>
@@ -63,7 +67,6 @@
     </div>
 
     <script>
-        // ⚠️ IMPORTANTE: URL CORREGIDA CON COMILLAS
         const CLOUD_FUNCTION_URL = "https://simonbot-deposit-accounting-provision-625642864594.europe-west1.run.app/";
 
         document.getElementById('simonForm').addEventListener('submit', async function(e) {
@@ -71,19 +74,18 @@
 
             const btn = document.getElementById('btnEnviar');
             const mensajeDiv = document.getElementById('mensaje');
-            const formData = new FormData(this);
+            const formData = new FormData(this); // 💡 Aquí ya viajan el Analista y el PIN automáticamente
 
             btn.disabled = true;
-            btn.innerText = "⏳ Procesando en la nube...";
+            btn.innerText = "⏳ Verificando seguridad y procesando...";
             mensajeDiv.style.display = "none";
             mensajeDiv.className = "";
 
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer super_secreto_simon_2026' // <--- LLAVE DE SEGURIDAD AGREGADA
-                    },
+                    // Nota: Quité el header "Authorization" porque enviaremos el PIN directamente en el form,
+                    // igual que hacemos con Isabot, para estandarizar la seguridad.
                     body: formData
                 });
                 
@@ -93,6 +95,11 @@
                 if (response.ok) {
                     mensajeDiv.innerText = "✅ " + result.mensaje;
                     mensajeDiv.className = "success";
+                    // Limpiar el PIN por seguridad tras el éxito
+                    document.querySelector('input[name="pin"]').value = ""; 
+                } else if (response.status === 401) {
+                    mensajeDiv.innerText = "❌ Acceso Denegado: " + (result.mensaje || "PIN Incorrecto");
+                    mensajeDiv.className = "error";
                 } else {
                     mensajeDiv.innerText = "❌ " + (result.mensaje || "Error desconocido");
                     mensajeDiv.className = "error";
