@@ -14,7 +14,13 @@
         h2 { color: #10b981; margin-top: 0; font-size: 1.8rem; }
         p { color: #94a3b8; line-height: 1.6; }
         
-        .upload-area { border: 2px dashed #475569; padding: 50px 20px; border-radius: 12px; margin: 30px 0; cursor: pointer; transition: all 0.3s ease; background: rgba(15, 23, 42, 0.3); }
+        /* 🛡️ Estilos para el bloque de seguridad (copiados de Simonbot) */
+        .form-group { text-align: left; margin: 25px 0 15px 0; background: rgba(15, 23, 42, 0.4); padding: 15px; border-radius: 8px; border: 1px solid #475569;}
+        label { display: block; color: #cbd5e1; font-weight: bold; margin-bottom: 8px; font-size: 0.95rem; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 14px; background-color: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 1rem; margin-bottom: 15px; box-sizing: border-box; }
+        input[type="text"]:focus, input[type="password"]:focus { outline: none; border-color: #10b981; }
+
+        .upload-area { border: 2px dashed #475569; padding: 50px 20px; border-radius: 12px; margin: 20px 0; cursor: pointer; transition: all 0.3s ease; background: rgba(15, 23, 42, 0.3); }
         .upload-area:hover { border-color: #10b981; background: rgba(16, 185, 129, 0.05); }
         
         input[type="file"] { display: none; }
@@ -26,6 +32,7 @@
         #mensaje { margin-top: 25px; padding: 15px; border-radius: 8px; display: none; font-size: 0.95rem; line-height: 1.4; }
         .success { background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; }
         .error { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
+        .warning { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid #f59e0b; }
     </style>
 </head>
 <body>
@@ -38,6 +45,14 @@
         <h2>👩‍💻 Katebot: Conciliación</h2>
         <p>Sube el extracto del BanRep. Katebot cruzará los datos con las expectativas de Isa y notificará a Slack.</p>
         
+        <div class="form-group">
+            <label for="analista">👤 Tu Nombre o Alias:</label>
+            <input type="text" id="analista" placeholder="Ej: Tu Nombre" required>
+
+            <label for="pin" style="margin-top: 10px;">🔐 PIN de Autorización:</label>
+            <input type="password" id="pin" placeholder="****" required>
+        </div>
+
         <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
             <div style="font-size: 3rem; margin-bottom: 10px;">📊</div>
             <p id="fileName">Haz clic o selecciona el archivo Excel aquí</p>
@@ -64,12 +79,26 @@
         };
 
         btn.onclick = async () => {
+            // 🛡️ Extraemos los datos de seguridad
+            const usuario = document.getElementById('analista').value.trim();
+            const pin = document.getElementById('pin').value.trim();
+            
+            if (!usuario || !pin) {
+                msg.innerHTML = "<strong>⚠️ Faltan datos</strong><br>Por favor, ingresa tu nombre y el PIN de operación.";
+                msg.className = "warning";
+                msg.style.display = "block";
+                return;
+            }
+
             btn.disabled = true;
-            btn.innerText = "⏳ Subiendo extracto...";
+            btn.innerText = "⏳ Verificando seguridad y subiendo...";
             msg.style.display = "none";
             
+            // 💡 Empaquetamos el archivo JUNTO con las credenciales
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
+            formData.append('analista', usuario);
+            formData.append('pin', pin);
 
             try {
                 const response = await fetch(URL_UPLOAD, {
@@ -77,17 +106,28 @@
                     body: formData
                 });
                 
+                // Intentamos parsear a JSON, por si el backend nos responde con un error de PIN (401)
+                let result = {};
+                try {
+                    result = await response.json();
+                } catch (e) {
+                    console.log("Respuesta no es JSON (probablemente el OK original o error genérico).");
+                }
+
                 if (response.ok) {
                     msg.innerHTML = "<strong>✅ ¡Archivo procesado!</strong><br>Katebot ha iniciado el cruce de datos. Revisa Slack en un momento.";
                     msg.className = "success";
                     msg.style.display = "block";
                     fileInput.value = ""; 
+                    document.getElementById('pin').value = ""; // Limpiar el PIN por seguridad
                     btn.innerText = "🚀 Subir y Conciliar";
+                } else if (response.status === 401) {
+                    throw new Error("PIN Incorrecto. No tienes autorización.");
                 } else {
-                    throw new Error();
+                    throw new Error(result.mensaje || "Error interno del servidor.");
                 }
             } catch (error) {
-                msg.innerHTML = "<strong>❌ Error al subir</strong><br>Verifica que la función tenga habilitado CORS o intenta de nuevo.";
+                msg.innerHTML = `<strong>❌ Error al subir</strong><br>${error.message}`;
                 msg.className = "error";
                 msg.style.display = "block";
                 btn.disabled = false;
