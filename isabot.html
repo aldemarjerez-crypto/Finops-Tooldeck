@@ -16,9 +16,10 @@
         
         .form-group { text-align: left; margin: 25px 0 15px 0; }
         label { display: block; color: #cbd5e1; font-weight: bold; margin-bottom: 8px; font-size: 0.95rem; }
-        select { width: 100%; padding: 14px; background-color: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 1rem; cursor: pointer; }
+        input { width: 100%; padding: 14px; background-color: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 1rem; margin-bottom: 15px; box-sizing: border-box; }
+        input:focus { outline: none; border-color: #ec4899; }
         
-        button { width: 100%; background-color: #ec4899; color: white; padding: 18px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px;}
+        button { width: 100%; background-color: #ec4899; color: white; padding: 18px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 5px;}
         button:hover { background-color: #db2777; }
         button:disabled { background-color: #475569; cursor: not-allowed; opacity: 0.7; }
         
@@ -36,22 +37,19 @@
 
     <div class="container">
         <h2>💰 Isabot: Treasury</h2>
-        <p>Isabot se conectará al Drive para buscar las monetizaciones con fecha de hoy y evitará duplicados.</p>
+        <p>Procesamiento de monetizaciones con protección anti-duplicados.</p>
         
-        <div style="font-size: 4.5rem; margin: 20px 0;">📊☁️</div>
+        <div style="font-size: 4.5rem; margin: 15px 0;">🔒☁️</div>
 
         <div class="form-group">
-            <label for="analista">¿Quién ejecuta el proceso hoy?</label>
-            <select id="analista" required>
-                <option value="">Selecciona tu nombre...</option>
-                <option value="María I. Caicedo">María I. Caicedo</option>
-                <option value="Andrés Felipe (Alde)">Andrés Felipe (Alde)</option>
-                <option value="Kate Adies">Kate Adies</option>
-                <option value="Otro FinOps">Otro (Equipo FinOps)</option>
-            </select>
+            <label for="analista">Tu Nombre o Alias:</label>
+            <input type="text" id="analista" placeholder="Ej: Kate" required>
+
+            <label for="pin">PIN de Autorización:</label>
+            <input type="password" id="pin" placeholder="****" required>
         </div>
 
-        <button id="btnProcesar">🚀 Procesar Registros del Día</button>
+        <button id="btnProcesar">🚀 Autorizar y Procesar</button>
         <div id="mensaje"></div>
     </div>
 
@@ -59,46 +57,48 @@
         const URL_ISA = "https://isabot-treasury-625642864594.europe-west1.run.app";
         const btn = document.getElementById('btnProcesar');
         const msg = document.getElementById('mensaje');
-        const analistaSelect = document.getElementById('analista');
 
         btn.onclick = async () => {
-            const usuario = analistaSelect.value;
+            const usuario = document.getElementById('analista').value.trim();
+            const pin = document.getElementById('pin').value.trim();
             
-            // Validación para que no lo lancen sin poner su nombre
-            if (!usuario) {
-                msg.innerHTML = "<strong>⚠️ Espera un momento</strong><br>Por favor, selecciona tu nombre en la lista antes de continuar.";
+            if (!usuario || !pin) {
+                msg.innerHTML = "<strong>⚠️ Faltan datos</strong><br>Por favor, ingresa tu nombre y el PIN de operación.";
                 msg.className = "warning";
                 msg.style.display = "block";
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "⏳ Leyendo Google Sheets...";
+            btn.innerText = "⏳ Verificando credenciales...";
             msg.style.display = "none";
             
             try {
-                // Ahora enviamos el nombre del usuario a la función
                 const response = await fetch(URL_ISA, { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ usuario: usuario })
+                    body: JSON.stringify({ usuario: usuario, pin: pin })
                 });
+                
                 const result = await response.json();
                 
                 if (response.ok) {
-                    msg.innerHTML = `<strong>✅ ¡Completado!</strong><br>${result.mensaje}`;
+                    msg.innerHTML = `<strong>✅ ¡Proceso Exitoso!</strong><br>${result.mensaje}`;
                     msg.className = "success";
                     msg.style.display = "block";
+                    document.getElementById('pin').value = ""; // Limpiar el PIN por seguridad
+                } else if (response.status === 401) {
+                    throw new Error("PIN Incorrecto. No tienes autorización.");
                 } else {
                     throw new Error(result.mensaje || "Error al conectar con la base de datos.");
                 }
             } catch (error) {
-                msg.innerHTML = `<strong>❌ Error</strong><br>${error.message}`;
+                msg.innerHTML = `<strong>❌ Operación Rechazada</strong><br>${error.message}`;
                 msg.className = "error";
                 msg.style.display = "block";
             } finally {
                 btn.disabled = false;
-                btn.innerText = "🚀 Procesar Registros del Día";
+                btn.innerText = "🚀 Autorizar y Procesar";
             }
         };
     </script>
