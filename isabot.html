@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Isabot | Treasury Deck</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 20px; margin: 0; }
         .nav-bar { max-width: 500px; margin: 0 auto 20px auto; }
@@ -27,6 +28,10 @@
         .success { background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; }
         .error { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
         .warning { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid #f59e0b; }
+
+        /* 🛡️ Estilos para el contenedor de Google Auth */
+        .auth-container { margin: 20px 0; display: flex; justify-content: center; }
+        #auth-status { font-size: 0.9rem; color: #10b981; margin-bottom: 15px; display: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -37,47 +42,83 @@
 
     <div class="container">
         <h2>💰 Isabot: Treasury</h2>
-        <p>Procesamiento de monetizaciones con protección anti-duplicados.</p>
+        <p>Procesamiento de monetizaciones con protección Zero Trust.</p>
         
         <div style="font-size: 4.5rem; margin: 15px 0;">🔒☁️</div>
 
-        <div class="form-group">
-            <label for="analista">Tu Nombre o Alias:</label>
-            <input type="text" id="analista" placeholder="Ej: Kate" required>
+        <div class="auth-container">
+            <div id="g_id_onload"
+                 data-client_id="TU_CLIENT_ID_DE_GOOGLE_AQUI.apps.googleusercontent.com"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-shape="rectangular"
+                 data-theme="outline"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left">
+            </div>
+        </div>
+        
+        <div id="auth-status">✅ Identidad verificada de forma segura</div>
 
-            <label for="pin">PIN de Autorización:</label>
-            <input type="password" id="pin" placeholder="****" required>
+        <div class="form-group">
+            <label for="analista">Tu Nombre o Alias (Para Slack):</label>
+            <input type="text" id="analista" placeholder="Ej: Kate" required>
         </div>
 
-        <button id="btnProcesar">🚀 Autorizar y Procesar</button>
+        <button id="btnProcesar" disabled style="background-color: #475569; cursor: not-allowed;">🚀 Autorizar y Procesar</button>
         <div id="mensaje"></div>
     </div>
 
     <script>
-        const URL_ISA = "https://isabot-treasury-625642864594.europe-west1.run.app";
+        // Nota: Asegúrate de que esta URL apunte ahora al Load Balancer que creaste, NO directo al Cloud Run.
+        const URL_ISA = "https://isabot-treasury-625642864594.europe-west1.run.app"; 
         const btn = document.getElementById('btnProcesar');
         const msg = document.getElementById('mensaje');
+        let googleJwtToken = ""; // Aquí guardaremos el token seguro
+
+        // 🛡️ Callback que ejecuta Google cuando el usuario inicia sesión con éxito
+        function handleCredentialResponse(response) {
+            googleJwtToken = response.credential; // Este es el ID Token (JWT)
+            
+            // Ocultamos el botón de Google y mostramos confirmación
+            document.querySelector('.g_id_signin').style.display = 'none';
+            document.getElementById('auth-status').style.display = 'block';
+            
+            // Habilitamos el botón de procesar
+            btn.disabled = false;
+            btn.style.backgroundColor = '#ec4899';
+            btn.style.cursor = 'pointer';
+        }
 
         btn.onclick = async () => {
             const usuario = document.getElementById('analista').value.trim();
-            const pin = document.getElementById('pin').value.trim();
             
-            if (!usuario || !pin) {
-                msg.innerHTML = "<strong>⚠️ Faltan datos</strong><br>Por favor, ingresa tu nombre y el PIN de operación.";
+            if (!usuario || !googleJwtToken) {
+                msg.innerHTML = "<strong>⚠️ Faltan datos</strong><br>Asegúrate de ingresar tu nombre y haber iniciado sesión con Google.";
                 msg.className = "warning";
                 msg.style.display = "block";
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "⏳ Verificando credenciales...";
+            btn.innerText = "⏳ Verificando encriptación y procesando...";
             msg.style.display = "none";
             
             try {
                 const response = await fetch(URL_ISA, { 
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ usuario: usuario, pin: pin })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        // 🛡️ Magia Zero Trust: Enviamos el JWT firmado por Google al Load Balancer
+                        'Authorization': `Bearer ${googleJwtToken}` 
+                    },
+                    body: JSON.stringify({ usuario: usuario }) // Ya no enviamos el PIN en el body
                 });
                 
                 const result = await response.json();
@@ -86,9 +127,8 @@
                     msg.innerHTML = `<strong>✅ ¡Proceso Exitoso!</strong><br>${result.mensaje}`;
                     msg.className = "success";
                     msg.style.display = "block";
-                    document.getElementById('pin').value = ""; // Limpiar el PIN por seguridad
-                } else if (response.status === 401) {
-                    throw new Error("PIN Incorrecto. No tienes autorización.");
+                } else if (response.status === 401 || response.status === 403) {
+                    throw new Error("Acceso Denegado por Identity-Aware Proxy. No estás en la lista de permitidos.");
                 } else {
                     throw new Error(result.mensaje || "Error al conectar con la base de datos.");
                 }
