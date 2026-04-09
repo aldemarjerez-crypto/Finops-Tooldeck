@@ -29,7 +29,6 @@
         .error { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
         .warning { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid #f59e0b; }
 
-        /* 🛡️ Estilos para el contenedor de Google Auth */
         .auth-container { margin: 20px 0; display: flex; justify-content: center; }
         #auth-status { font-size: 0.9rem; color: #10b981; margin-bottom: 15px; display: none; font-weight: bold; }
     </style>
@@ -76,21 +75,18 @@
     </div>
 
     <script>
-        // Nota: Asegúrate de que esta URL apunte ahora al Load Balancer que creaste, NO directo al Cloud Run.
-        const URL_ISA = "https://isabot-treasury-625642864594.europe-west1.run.app"; 
+        // 🛡️ IMPORTANTE: Reemplaza con la IP que te dio Google Cloud. 
+        // Usamos http:// porque aún no hemos configurado el certificado SSL en el Load Balancer.
+        const URL_ISA = "http://136.110.238.239:80"; 
+
         const btn = document.getElementById('btnProcesar');
         const msg = document.getElementById('mensaje');
-        let googleJwtToken = ""; // Aquí guardaremos el token seguro
+        let googleJwtToken = ""; 
 
-        // 🛡️ Callback que ejecuta Google cuando el usuario inicia sesión con éxito
         function handleCredentialResponse(response) {
-            googleJwtToken = response.credential; // Este es el ID Token (JWT)
-            
-            // Ocultamos el botón de Google y mostramos confirmación
+            googleJwtToken = response.credential; 
             document.querySelector('.g_id_signin').style.display = 'none';
             document.getElementById('auth-status').style.display = 'block';
-            
-            // Habilitamos el botón de procesar
             btn.disabled = false;
             btn.style.backgroundColor = '#ec4899';
             btn.style.cursor = 'pointer';
@@ -100,14 +96,14 @@
             const usuario = document.getElementById('analista').value.trim();
             
             if (!usuario || !googleJwtToken) {
-                msg.innerHTML = "<strong>⚠️ Faltan datos</strong><br>Asegúrate de ingresar tu nombre y haber iniciado sesión con Google.";
+                msg.innerHTML = "<strong>⚠️ Faltan datos</strong><br>Inicia sesión con Google e ingresa tu nombre.";
                 msg.className = "warning";
                 msg.style.display = "block";
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "⏳ Verificando encriptación y procesando...";
+            btn.innerText = "⏳ Validando en el perímetro...";
             msg.style.display = "none";
             
             try {
@@ -115,10 +111,9 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        // 🛡️ Magia Zero Trust: Enviamos el JWT firmado por Google al Load Balancer
                         'Authorization': `Bearer ${googleJwtToken}` 
                     },
-                    body: JSON.stringify({ usuario: usuario }) // Ya no enviamos el PIN en el body
+                    body: JSON.stringify({ usuario: usuario }) 
                 });
                 
                 const result = await response.json();
@@ -128,9 +123,11 @@
                     msg.className = "success";
                     msg.style.display = "block";
                 } else if (response.status === 401 || response.status === 403) {
-                    throw new Error("Acceso Denegado por Identity-Aware Proxy. No estás en la lista de permitidos.");
+                    throw new Error("Acceso denegado por IAP. Revisa tus permisos en la consola de Google.");
+                } else if (response.status === 429) {
+                    throw new Error("¡Calma! Cloud Armor bloqueó la petición por exceso de velocidad (Límite: 3/min).");
                 } else {
-                    throw new Error(result.mensaje || "Error al conectar con la base de datos.");
+                    throw new Error(result.mensaje || "Error en la comunicación con el backend.");
                 }
             } catch (error) {
                 msg.innerHTML = `<strong>❌ Operación Rechazada</strong><br>${error.message}`;
