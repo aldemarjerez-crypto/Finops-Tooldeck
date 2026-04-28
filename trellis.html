@@ -2,137 +2,134 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ledger Matrix v2 | FinOps Control</title>
+    <title>Ledger Product Sync | Control Panel</title>
     <style>
         :root {
-            --neon-green: #00ff41; --danger: #ff003c; --bg: #050505; --surface: #111; --border: #333;
+            --primary: #1a2b4b; --secondary: #64748b; --success: #10b981;
+            --warning: #f59e0b; --bg: #f8fafc; --card: #ffffff;
         }
-        body { font-family: 'JetBrains Mono', monospace; background: var(--bg); color: #fff; margin: 0; padding: 20px; font-size: 13px; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--primary); margin: 0; padding: 40px; }
         
-        /* Dashboard Stats */
-        .header { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
-        .stat-box { border: 1px solid var(--border); padding: 15px; background: var(--surface); position: relative; }
-        .stat-box::after { content: ""; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--neon-green); }
-        .stat-val { font-size: 20px; font-weight: bold; color: var(--neon-green); display: block; margin-top: 5px; }
-        .label { color: #888; font-size: 10px; text-transform: uppercase; }
+        /* Stats Bar */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .metric-card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 22%; text-align: center; }
+        .metric-val { display: block; font-size: 28px; font-weight: 700; color: var(--primary); }
+        .metric-label { font-size: 12px; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Pipeline */
-        .step { border: 1px solid var(--border); background: var(--surface); margin-bottom: 10px; overflow: hidden; }
-        .step-header { display: grid; grid-template-columns: 60px 1fr 180px 120px 100px; align-items: center; padding: 15px; cursor: pointer; }
-        .step-header:hover { background: #1a1a1a; }
+        /* Steps Container */
+        .workflow { display: flex; flex-direction: column; gap: 20px; }
+        .step-container { background: var(--card); border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; }
         
-        /* Micro-actividades */
-        .details { background: #0a0a0a; padding: 0 20px; max-height: 0; transition: max-height 0.3s ease-out; border-top: 0 solid var(--border); }
-        .details.open { max-height: 500px; padding: 20px; border-top: 1px solid var(--border); }
-        
-        .task-list { list-style: none; padding: 0; margin: 0; }
-        .task-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; color: #bbb; }
-        .task-item input[type="checkbox"] { accent-color: var(--neon-green); }
+        .step-main { display: grid; grid-template-columns: 100px 1fr 200px 150px; align-items: center; padding: 20px; cursor: pointer; }
+        .step-main:hover { background: #f1f5f9; }
 
-        .tag-owner { font-size: 10px; color: #00aaff; border: 1px solid #00aaff; padding: 1px 4px; border-radius: 3px; margin-right: 8px; }
-        .account-t { color: #555; font-size: 11px; margin-top: 4px; }
-        .status-pill { font-size: 10px; padding: 2px 6px; border-radius: 10px; text-align: center; }
+        /* Task Section */
+        .task-area { background: #fcfcfc; padding: 0 40px; max-height: 0; overflow: hidden; transition: all 0.3s ease; border-top: 0px solid #eee; }
+        .task-area.open { max-height: 500px; padding: 25px 40px; border-top: 1px solid #eee; }
+        
+        .task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .task-item { display: flex; align-items: center; gap: 12px; font-size: 14px; padding: 8px; border-radius: 6px; border: 1px solid transparent; }
+        .task-item:hover { border-color: #e2e8f0; background: white; }
+        
+        /* Indicators */
+        .progress-pill { background: #e2e8f0; border-radius: 20px; height: 8px; width: 100px; display: inline-block; overflow: hidden; }
+        .progress-fill { background: var(--success); height: 100%; transition: width 0.4s; }
+        .owner-avatar { display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 14px; }
+        .avatar-circle { width: 32px; height: 32px; background: #cbd5e1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+        .btn-add { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="stat-box">
-            <span class="label">Días para Meta (Go-Live)</span>
-            <span class="stat-val" id="days-to-goal">14 Días</span>
+    <div class="dashboard-header">
+        <div>
+            <h1 style="margin:0">Product Ledger Deployment</h1>
+            <p style="color: var(--secondary)">Sprint: Q2 - New Deposit Product</p>
         </div>
-        <div class="stat-box" style="border-color: var(--danger);">
-            <span class="label">Costo Retraso (Daily Opportunity)</span>
-            <span class="stat-val" style="color: var(--danger)">$4,250.00</span>
+        <div class="metric-card" style="border-bottom: 4px solid var(--primary)">
+            <span class="metric-label">Días para Go-Live</span>
+            <span class="metric-val">12</span>
         </div>
-        <div class="stat-box">
-            <span class="label">Ready to Test</span>
-            <span class="stat-val" id="ready-status" style="color: #555;">NO READY</span>
-        </div>
-        <div class="stat-box">
-            <span class="label">Global Progress</span>
-            <span class="stat-val">42%</span>
+        <div class="metric-card" style="border-bottom: 4px solid var(--success)">
+            <span class="metric-label">Progreso Global</span>
+            <span class="metric-val" id="global-pct">45%</span>
         </div>
     </div>
 
-    <div class="pipeline">
-        <div class="step">
-            <div class="step-header" onclick="toggleDetails('d1')">
-                <div style="color: var(--neon-green)">100%</div>
+    <div class="workflow">
+        <div class="step-container">
+            <div class="step-main" onclick="toggle('accounting')">
+                <div class="metric-val" style="font-size: 18px;">60%</div>
                 <div>
-                    <span class="tag-owner">PRODUCTO</span>
-                    <strong>Definición del Flujo de Fondos</strong>
-                    <div class="account-t">Ledger Mapping: Deposit → Liability</div>
+                    <strong style="display:block">Definición de Modelo Contable</strong>
+                    <span style="font-size: 12px; color: var(--secondary)">Ledger Events & Chart of Accounts</span>
                 </div>
-                <div>Marco Aurelio</div>
-                <div style="color: #888;">Low Impact</div>
-                <div class="status-pill" style="background: rgba(0,255,65,0.1); color: var(--neon-green);">COMPLETED</div>
+                <div class="owner-avatar">
+                    <div class="avatar-circle">SC</div>
+                    Sandra Contador
+                </div>
+                <div style="text-align: right;">
+                    <div class="progress-pill"><div class="progress-fill" style="width: 60%"></div></div>
+                </div>
             </div>
-            <div id="d1" class="details">
-                <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" checked> Definir User Cases (Depósito Inicial, Top-up)</li>
-                    <li class="task-item"><input type="checkbox" checked> Mapeo de API Endpoints vs Ledger Events</li>
-                    <li class="task-item"><input type="checkbox" checked> Validación de campos obligatorios (Metadata)</li>
-                </ul>
+            
+            <div id="accounting" class="task-area">
+                <div class="task-grid" id="task-list-accounting">
+                    <div class="task-item"><input type="checkbox" checked> Mapeo de Cuentas T</div>
+                    <div class="task-item"><input type="checkbox" checked> Definición de lógica de devengo</div>
+                    <div class="task-item"><input type="checkbox"> Configuración de Impuestos</div>
+                    <div class="task-item"><input type="checkbox"> Validación de saldos mínimos</div>
+                </div>
+                <button class="btn-add" onclick="addNewTask('accounting')">+ Nueva Actividad</button>
             </div>
         </div>
 
-        <div class="step">
-            <div class="step-header" onclick="toggleDetails('d2')">
-                <div style="color: #ffab00">65%</div>
+        <div class="step-container">
+            <div class="step-main" onclick="toggle('infosec')">
+                <div class="metric-val" style="font-size: 18px; color: var(--warning)">25%</div>
                 <div>
-                    <span class="tag-owner" style="color: #ffab00; border-color: #ffab00;">FINANZAS</span>
-                    <strong>Modelo Contable & Accrual</strong>
-                    <div class="account-t">Rules: Daily Interest / Tax Withholding</div>
+                    <strong style="display:block">Seguridad & Inmutabilidad</strong>
+                    <span style="font-size: 12px; color: var(--secondary)">Hash Verification & Audit Trails</span>
                 </div>
-                <div>Sandra Contador</div>
-                <div style="color: #ffab00;">Efficiency: 92%</div>
-                <div class="status-pill" style="background: rgba(255,171,0,0.1); color: #ffab00;">IN PROGRESS</div>
-            </div>
-            <div id="d2" class="details">
-                <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" checked> Creación de Chart of Accounts (COA)</li>
-                    <li class="task-item"><input type="checkbox" checked> Lógica de cálculo de intereses diarios</li>
-                    <li class="task-item"><input type="checkbox"> Definición de retención de impuestos (Withholding Tax)</li>
-                    <li class="task-item"><input type="checkbox"> Configuración de reportes de cierre mensual</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="step" style="border-left: 3px solid var(--danger);">
-            <div class="step-header" onclick="toggleDetails('d3')">
-                <div style="color: var(--danger)">10%</div>
-                <div>
-                    <span class="tag-owner" style="color: var(--danger); border-color: var(--danger);">INFOSEC</span>
-                    <strong>Security Audit & Immute Check</strong>
-                    <div class="account-t">Control: Anti-tampering Ledger Hash</div>
+                <div class="owner-avatar">
+                    <div class="avatar-circle" style="background:#fee2e2; color:#b91c1c">RE</div>
+                    Raúl Escudo
                 </div>
-                <div>Raúl Escudo</div>
-                <div style="color: var(--danger);">Risk: HIGH</div>
-                <div class="status-pill" style="background: rgba(255,0,60,0.1); color: var(--danger);">BLOCKER</div>
+                <div style="text-align: right;">
+                    <div class="progress-pill"><div class="progress-fill" style="width: 25%; background: var(--warning)"></div></div>
+                </div>
             </div>
-            <div id="d3" class="details">
-                <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" checked> Revisión de permisos de lectura/escritura</li>
-                    <li class="task-item"><input type="checkbox"> Firma digital de transacciones</li>
-                    <li class="task-item"><input type="checkbox"> Pentest sobre el motor de conciliación</li>
-                </ul>
+            <div id="infosec" class="task-area">
+                <div class="task-grid">
+                    <div class="task-item"><input type="checkbox" checked> Firma de transacciones</div>
+                    <div class="task-item"><input type="checkbox"> Prueba de inmutabilidad en DB</div>
+                    <div class="task-item"><input type="checkbox"> Auditoría de accesos al Ledger</div>
+                </div>
+                <button class="btn-add" onclick="addNewTask('infosec')">+ Nueva Actividad</button>
             </div>
         </div>
     </div>
 
     <script>
-        function toggleDetails(id) {
-            document.getElementById(id).classList.toggle('open');
+        function toggle(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('open');
         }
 
-        // Lógica "Ready to Test"
-        // Si Paso 1 y Paso 2 están arriba de cierto umbral, cambia el status.
-        const p1 = 100;
-        const p2 = 65;
-        if(p1 === 100 && p2 >= 80) {
-            document.getElementById('ready-status').innerText = "READY";
-            document.getElementById('ready-status').style.color = "var(--neon-green)";
+        function addNewTask(stepId) {
+            const taskName = prompt("Nombre de la nueva actividad:");
+            if (taskName) {
+                const container = document.querySelector(`#${stepId} .task-grid`);
+                const div = document.createElement('div');
+                div.className = 'task-item';
+                div.innerHTML = `<input type="checkbox"> ${taskName}`;
+                container.appendChild(div);
+                
+                // Aquí iría el llamado a la Cloud Function:
+                // fetch('https://api.tudominio.com/updateTask', { method: 'POST', body: ... })
+                alert("Tarea enviada a la base de datos y recalculando avance...");
+            }
         }
     </script>
 </body>
