@@ -2,111 +2,91 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ledger Product Sync | Control Panel</title>
+    <title>Ledger Sync | Fintech Flow</title>
     <style>
         :root {
-            --primary: #1a2b4b; --secondary: #64748b; --success: #10b981;
-            --warning: #f59e0b; --bg: #f8fafc; --card: #ffffff;
+            --slate-900: #0f172a; --slate-700: #334155; --blue-600: #2563eb;
+            --emerald-600: #059669; --border: #e2e8f0; --bg: #f8fafc;
         }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--primary); margin: 0; padding: 40px; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--slate-900); padding: 30px; }
         
-        /* Stats Bar */
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        .metric-card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 22%; text-align: center; }
-        .metric-val { display: block; font-size: 28px; font-weight: 700; color: var(--primary); }
-        .metric-label { font-size: 12px; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .flow-container { max-width: 1000px; margin: 0 auto; }
+        .step-card { background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; transition: all 0.2s; }
+        .step-card.active { border-left: 6px solid var(--blue-600); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-        /* Steps Container */
-        .workflow { display: flex; flex-direction: column; gap: 20px; }
-        .step-container { background: var(--card); border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .step-header { padding: 20px; display: grid; grid-template-columns: 2fr 1fr 1fr auto; align-items: center; cursor: pointer; }
+        .owner-badge { font-size: 11px; background: #eff6ff; color: var(--blue-600); padding: 4px 8px; border-radius: 4px; font-weight: 600; }
         
-        .step-main { display: grid; grid-template-columns: 100px 1fr 200px 150px; align-items: center; padding: 20px; cursor: pointer; }
-        .step-main:hover { background: #f1f5f9; }
+        .tech-details { background: #f1f5f9; padding: 20px; border-top: 1px solid var(--border); display: none; }
+        .tech-details.open { display: block; }
 
-        /* Task Section */
-        .task-area { background: #fcfcfc; padding: 0 40px; max-height: 0; overflow: hidden; transition: all 0.3s ease; border-top: 0px solid #eee; }
-        .task-area.open { max-height: 500px; padding: 25px 40px; border-top: 1px solid #eee; }
-        
-        .task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .task-item { display: flex; align-items: center; gap: 12px; font-size: 14px; padding: 8px; border-radius: 6px; border: 1px solid transparent; }
-        .task-item:hover { border-color: #e2e8f0; background: white; }
-        
-        /* Indicators */
-        .progress-pill { background: #e2e8f0; border-radius: 20px; height: 8px; width: 100px; display: inline-block; overflow: hidden; }
-        .progress-fill { background: var(--success); height: 100%; transition: width 0.4s; }
-        .owner-avatar { display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 14px; }
-        .avatar-circle { width: 32px; height: 32px; background: #cbd5e1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        /* Campos técnicos de SAP/Contabilidad */
+        .sap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px; }
+        .data-field { background: white; border: 1px solid var(--border); padding: 10px; border-radius: 6px; }
+        .data-field label { display: block; font-size: 10px; color: var(--slate-700); text-transform: uppercase; margin-bottom: 4px; }
+        .data-field input { border: none; width: 100%; font-family: monospace; font-size: 13px; outline: none; }
 
-        .btn-add { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-top: 15px; }
+        .hand-off-btn { background: var(--blue-600); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; margin-top: 20px; font-weight: 600; }
+        .status-tag { font-size: 12px; font-weight: 700; color: var(--emerald-600); }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-header">
-        <div>
-            <h1 style="margin:0">Product Ledger Deployment</h1>
-            <p style="color: var(--secondary)">Sprint: Q2 - New Deposit Product</p>
-        </div>
-        <div class="metric-card" style="border-bottom: 4px solid var(--primary)">
-            <span class="metric-label">Días para Go-Live</span>
-            <span class="metric-val">12</span>
-        </div>
-        <div class="metric-card" style="border-bottom: 4px solid var(--success)">
-            <span class="metric-label">Progreso Global</span>
-            <span class="metric-val" id="global-pct">45%</span>
-        </div>
-    </div>
+    <div class="flow-container">
+        <header style="margin-bottom: 30px;">
+            <h1>Orquestador de Producto: Depósitos v1</h1>
+            <p>Estado: <strong>Esperando Definición Contable</strong></p>
+        </header>
 
-    <div class="workflow">
-        <div class="step-container">
-            <div class="step-main" onclick="toggle('accounting')">
-                <div class="metric-val" style="font-size: 18px;">60%</div>
+        <div class="step-card active">
+            <div class="step-header" onclick="toggle('step1')">
                 <div>
-                    <strong style="display:block">Definición de Modelo Contable</strong>
-                    <span style="font-size: 12px; color: var(--secondary)">Ledger Events & Chart of Accounts</span>
+                    <strong>1. Flujo de Fondos & Validación</strong>
+                    <div style="font-size: 12px; color: var(--slate-700)">Inbound/Outbound + Reglas de Negocio</div>
                 </div>
-                <div class="owner-avatar">
-                    <div class="avatar-circle">SC</div>
-                    Sandra Contador
-                </div>
-                <div style="text-align: right;">
-                    <div class="progress-pill"><div class="progress-fill" style="width: 60%"></div></div>
-                </div>
+                <div class="owner-badge">PRODUCTO → TESORERÍA</div>
+                <div class="status-tag">EN VALIDACIÓN</div>
+                <span>▼</span>
             </div>
-            
-            <div id="accounting" class="task-area">
-                <div class="task-grid" id="task-list-accounting">
-                    <div class="task-item"><input type="checkbox" checked> Mapeo de Cuentas T</div>
-                    <div class="task-item"><input type="checkbox" checked> Definición de lógica de devengo</div>
-                    <div class="task-item"><input type="checkbox"> Configuración de Impuestos</div>
-                    <div class="task-item"><input type="checkbox"> Validación de saldos mínimos</div>
+            <div id="step1" class="tech-details open">
+                <p style="font-size: 13px;">Diagrama de flujo entregado. Esperando que Tesorería valide cuentas puente de recaudo.</p>
+                <div class="sap-grid">
+                    <div class="data-field"><label>CIF/NIF Tercero</label><input type="text" value="800.123.456-1"></div>
+                    <div class="data-field"><label>Tipo de Depósito</label><input type="text" value="VISTA_RECAUDO"></div>
                 </div>
-                <button class="btn-add" onclick="addNewTask('accounting')">+ Nueva Actividad</button>
+                <button class="hand-off-btn">Delegar a FinOps →</button>
             </div>
         </div>
 
-        <div class="step-container">
-            <div class="step-main" onclick="toggle('infosec')">
-                <div class="metric-val" style="font-size: 18px; color: var(--warning)">25%</div>
+        <div class="step-card">
+            <div class="step-header" onclick="toggle('step2')">
                 <div>
-                    <strong style="display:block">Seguridad & Inmutabilidad</strong>
-                    <span style="font-size: 12px; color: var(--secondary)">Hash Verification & Audit Trails</span>
+                    <strong>2. Modelado Contable (SAP Bridge)</strong>
+                    <div style="font-size: 12px; color: var(--slate-700)">Asignación de cuentas y centros de costo</div>
                 </div>
-                <div class="owner-avatar">
-                    <div class="avatar-circle" style="background:#fee2e2; color:#b91c1c">RE</div>
-                    Raúl Escudo
-                </div>
-                <div style="text-align: right;">
-                    <div class="progress-pill"><div class="progress-fill" style="width: 25%; background: var(--warning)"></div></div>
-                </div>
+                <div class="owner-badge">FINOPS → CONTABILIDAD</div>
+                <div style="color: #94a3b8; font-size: 12px;">BLOQUEADO</div>
+                <span>▼</span>
             </div>
-            <div id="infosec" class="task-area">
-                <div class="task-grid">
-                    <div class="task-item"><input type="checkbox" checked> Firma de transacciones</div>
-                    <div class="task-item"><input type="checkbox"> Prueba de inmutabilidad en DB</div>
-                    <div class="task-item"><input type="checkbox"> Auditoría de accesos al Ledger</div>
+            <div id="step2" class="tech-details">
+                <div class="sap-grid">
+                    <div class="data-field"><label>Jornal Code (SAP)</label><input type="text" placeholder="Ej: AS01"></div>
+                    <div class="data-field"><label>Centro de Costo</label><input type="text" placeholder="CC_DEPOSIT_01"></div>
+                    <div class="data-field"><label>Centro Beneficio</label><input type="text" placeholder="CB_RET_02"></div>
+                    <div class="data-field"><label>Conf. Impositiva</label><input type="text" placeholder="IVA / GMF / RETEN"></div>
                 </div>
-                <button class="btn-add" onclick="addNewTask('infosec')">+ Nueva Actividad</button>
+                <button class="hand-off-btn" style="background: #94a3b8;">Esperando Datos Contables...</button>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <div>
+                    <strong>3. Implementación Core Ledger</strong>
+                    <div style="font-size: 12px; color: var(--slate-700)">Configuración técnica del motor contable</div>
+                </div>
+                <div class="owner-badge">TECH LEDGER</div>
+                <div style="color: #94a3b8; font-size: 12px;">PENDIENTE</div>
             </div>
         </div>
     </div>
@@ -115,21 +95,6 @@
         function toggle(id) {
             const el = document.getElementById(id);
             el.classList.toggle('open');
-        }
-
-        function addNewTask(stepId) {
-            const taskName = prompt("Nombre de la nueva actividad:");
-            if (taskName) {
-                const container = document.querySelector(`#${stepId} .task-grid`);
-                const div = document.createElement('div');
-                div.className = 'task-item';
-                div.innerHTML = `<input type="checkbox"> ${taskName}`;
-                container.appendChild(div);
-                
-                // Aquí iría el llamado a la Cloud Function:
-                // fetch('https://api.tudominio.com/updateTask', { method: 'POST', body: ... })
-                alert("Tarea enviada a la base de datos y recalculando avance...");
-            }
         }
     </script>
 </body>
