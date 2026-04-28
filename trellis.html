@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Ledger Management Board</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f5f7; margin: 0; padding: 20px; }
+        .board { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; }
+        .column { background-color: #ebecf0; border-radius: 8px; min-width: 300px; max-width: 300px; display: flex; flex-direction: column; padding: 10px; height: 80vh; }
+        .column h3 { font-size: 1.1rem; color: #172b4d; padding: 5px 10px; }
+        .card { background-color: #fff; border-radius: 5px; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); cursor: pointer; }
+        .card:hover { background-color: #f9fafb; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        .tag-prod { background-color: #e2e5ff; color: #403294; } /* Producto */
+        .tag-cont { background-color: #d4f1f4; color: #006666; } /* Contabilidad/Tesorería */
+        .tag-sec { background-color: #ffdce0; color: #ae2e24; }  /* InfoSec */
+        .tag-ops { background-color: #fff0b3; color: #85660b; }  /* FinOps */
+        p { font-size: 0.9rem; color: #444; margin: 5px 0; }
+    </style>
+</head>
+<body>
+
+    <h2>Pipeline de Lanzamiento: Producto & Ledger</h2>
+
+    <div class="board">
+        <div class="column">
+            <h3>1. Definición de Producto</h3>
+            <div class="card">
+                <span class="tag tag-prod">Producto</span>
+                <strong>Business Case</strong>
+                <p>Definición de fees, tasas y flujos de dinero del nuevo producto.</p>
+            </div>
+            <div class="card">
+                <span class="tag tag-ops">FinOps</span>
+                <strong>Unit Economics</strong>
+                <p>Análisis de rentabilidad y costos operativos de la transacción.</p>
+            </div>
+        </div>
+
+        <div class="column">
+            <h3>2. Modelo Contable (Ledger)</h3>
+            <div class="card">
+                <span class="tag tag-cont">Contabilidad</span>
+                <strong>Plan de Cuentas (Chart of Accounts)</strong>
+                <p>Mapeo de eventos de negocio a asientos contables (Débito/Crédito).</p>
+            </div>
+            <div class="card">
+                <span class="tag tag-cont">Tesorería</span>
+                <strong>Flujos de Liquidación</strong>
+                <p>Definir tiempos de clearing y conciliación bancaria.</p>
+            </div>
+        </div>
+
+        <div class="column">
+            <h3>3. Compliance & Seguridad</h3>
+            <div class="card">
+                <span class="tag tag-sec">InfoSec</span>
+                <strong>Auditoría de Ledger</strong>
+                <p>Definir controles de inmutabilidad y traza de auditoría.</p>
+            </div>
+            <div class="card">
+                <span class="tag tag-sec">Legal</span>
+                <strong>Regulaciones Locales</strong>
+                <p>Validar reportes regulatorios requeridos.</p>
+            </div>
+        </div>
+
+        <div class="column">
+            <h3>4. QA & Testing</h3>
+            <div class="card">
+                <span class="tag tag-prod">Producto</span>
+                <strong>Pruebas de Integración</strong>
+                <p>Validar que la API del producto impacta correctamente el Ledger.</p>
+            </div>
+            <div class="card">
+                <span class="tag tag-cont">Contabilidad</span>
+                <strong>Conciliación de Prueba</strong>
+                <p>Validar que el saldo del Ledger coincide con la cuenta puente.</p>
+            </div>
+        </div>
+
+        <div class="column">
+            <h3>5. Salida a Producción</h3>
+            <div class="card">
+                <span class="tag tag-ops">FinOps</span>
+                <strong>Monitoreo de Saldos</strong>
+                <p>Dashboard de control de saldos reales vs teóricos en vivo.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
