@@ -2,100 +2,189 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ledger Sync | Fintech Flow</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ledger Hand-off | Fintech OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --slate-900: #0f172a; --slate-700: #334155; --blue-600: #2563eb;
-            --emerald-600: #059669; --border: #e2e8f0; --bg: #f8fafc;
+            --primary: #1e293b; --accent: #2563eb; --success: #10b981;
+            --border: #e2e8f0; --bg: #f8fafc; --text-main: #334155;
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--slate-900); padding: 30px; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--primary); margin: 0; padding: 20px; }
         
-        .flow-container { max-width: 1000px; margin: 0 auto; }
-        .step-card { background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; transition: all 0.2s; }
-        .step-card.active { border-left: 6px solid var(--blue-600); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-
-        .step-header { padding: 20px; display: grid; grid-template-columns: 2fr 1fr 1fr auto; align-items: center; cursor: pointer; }
-        .owner-badge { font-size: 11px; background: #eff6ff; color: var(--blue-600); padding: 4px 8px; border-radius: 4px; font-weight: 600; }
+        .container { max-width: 900px; margin: 0 auto; }
         
-        .tech-details { background: #f1f5f9; padding: 20px; border-top: 1px solid var(--border); display: none; }
-        .tech-details.open { display: block; }
+        /* Header Stats */
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
+        .project-info h1 { margin: 0; font-size: 24px; letter-spacing: -0.5px; }
+        .badge-go-live { background: var(--primary); color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; }
 
-        /* Campos técnicos de SAP/Contabilidad */
-        .sap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px; }
-        .data-field { background: white; border: 1px solid var(--border); padding: 10px; border-radius: 6px; }
-        .data-field label { display: block; font-size: 10px; color: var(--slate-700); text-transform: uppercase; margin-bottom: 4px; }
-        .data-field input { border: none; width: 100%; font-family: monospace; font-size: 13px; outline: none; }
+        /* Step Card */
+        .card { background: white; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .step-number { background: var(--accent); color: white; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; margin-right: 10px; }
+        
+        /* Dynamic Form Section */
+        .card-body { padding: 20px; background: #ffffff; }
+        .instruction { font-size: 14px; color: var(--text-main); margin-bottom: 20px; padding-left: 10px; border-left: 3px solid var(--accent); }
+        
+        .grid-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .field-group { display: flex; flex-direction: column; gap: 5px; }
+        .field-group label { font-size: 11px; font-weight: 700; color: var(--text-main); text-transform: uppercase; }
+        .field-group input, .field-group select { 
+            padding: 10px; border: 1px solid var(--border); border-radius: 6px; 
+            font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none;
+        }
+        .field-group input:focus { border-color: var(--accent); ring: 2px solid #bfdbfe; }
 
-        .hand-off-btn { background: var(--blue-600); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; margin-top: 20px; font-weight: 600; }
-        .status-tag { font-size: 12px; font-weight: 700; color: var(--emerald-600); }
+        /* Hand-off Logic */
+        .handoff-section { margin-top: 25px; padding-top: 20px; border-top: 1px dashed var(--border); }
+        .selector-box { background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .btn-submit { 
+            width: 100%; background: var(--accent); color: white; border: none; padding: 14px; 
+            border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; 
+        }
+        .btn-submit:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+        /* Logs visuales */
+        .audit-note { font-size: 12px; color: #64748b; font-style: italic; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="flow-container">
-        <header style="margin-bottom: 30px;">
-            <h1>Orquestador de Producto: Depósitos v1</h1>
-            <p>Estado: <strong>Esperando Definición Contable</strong></p>
-        </header>
-
-        <div class="step-card active">
-            <div class="step-header" onclick="toggle('step1')">
-                <div>
-                    <strong>1. Flujo de Fondos & Validación</strong>
-                    <div style="font-size: 12px; color: var(--slate-700)">Inbound/Outbound + Reglas de Negocio</div>
-                </div>
-                <div class="owner-badge">PRODUCTO → TESORERÍA</div>
-                <div class="status-tag">EN VALIDACIÓN</div>
-                <span>▼</span>
-            </div>
-            <div id="step1" class="tech-details open">
-                <p style="font-size: 13px;">Diagrama de flujo entregado. Esperando que Tesorería valide cuentas puente de recaudo.</p>
-                <div class="sap-grid">
-                    <div class="data-field"><label>CIF/NIF Tercero</label><input type="text" value="800.123.456-1"></div>
-                    <div class="data-field"><label>Tipo de Depósito</label><input type="text" value="VISTA_RECAUDO"></div>
-                </div>
-                <button class="hand-off-btn">Delegar a FinOps →</button>
-            </div>
+<div class="container">
+    <div class="header">
+        <div class="project-info">
+            <span style="color: var(--accent); font-weight: bold; font-size: 12px;">PROJECT LEDGER v1.0</span>
+            <h1>Depósitos a la Vista - Retail</h1>
         </div>
-
-        <div class="step-card">
-            <div class="step-header" onclick="toggle('step2')">
-                <div>
-                    <strong>2. Modelado Contable (SAP Bridge)</strong>
-                    <div style="font-size: 12px; color: var(--slate-700)">Asignación de cuentas y centros de costo</div>
-                </div>
-                <div class="owner-badge">FINOPS → CONTABILIDAD</div>
-                <div style="color: #94a3b8; font-size: 12px;">BLOQUEADO</div>
-                <span>▼</span>
-            </div>
-            <div id="step2" class="tech-details">
-                <div class="sap-grid">
-                    <div class="data-field"><label>Jornal Code (SAP)</label><input type="text" placeholder="Ej: AS01"></div>
-                    <div class="data-field"><label>Centro de Costo</label><input type="text" placeholder="CC_DEPOSIT_01"></div>
-                    <div class="data-field"><label>Centro Beneficio</label><input type="text" placeholder="CB_RET_02"></div>
-                    <div class="data-field"><label>Conf. Impositiva</label><input type="text" placeholder="IVA / GMF / RETEN"></div>
-                </div>
-                <button class="hand-off-btn" style="background: #94a3b8;">Esperando Datos Contables...</button>
-            </div>
-        </div>
-
-        <div class="step-card">
-            <div class="step-header">
-                <div>
-                    <strong>3. Implementación Core Ledger</strong>
-                    <div style="font-size: 12px; color: var(--slate-700)">Configuración técnica del motor contable</div>
-                </div>
-                <div class="owner-badge">TECH LEDGER</div>
-                <div style="color: #94a3b8; font-size: 12px;">PENDIENTE</div>
-            </div>
+        <div class="badge-go-live">
+            <span style="font-size: 10px; display: block; opacity: 0.8; font-weight: normal;">ESTIMATED GO-LIVE</span>
+            T-14 DÍAS
         </div>
     </div>
 
-    <script>
-        function toggle(id) {
-            const el = document.getElementById(id);
-            el.classList.toggle('open');
+    <div class="card">
+        <div class="card-header">
+            <div><span class="step-number">1</span> <strong>Gestión de Configuración y Hand-off</strong></div>
+            <div id="status-pill" style="font-size: 12px; color: var(--success); font-weight: bold;">● ACTIVE SESSION</div>
+        </div>
+
+        <div class="card-body">
+            <div class="instruction" id="step-instruction">
+                Configure los parámetros iniciales del flujo de dinero para validación.
+            </div>
+
+            <div class="grid-fields" id="dynamic-fields">
+                </div>
+
+            <div class="handoff-section">
+                <div class="selector-box">
+                    <label style="font-size: 11px; font-weight: bold; display: block; margin-bottom: 8px;">PRÓXIMO RESPONSABLE EN LA CADENA:</label>
+                    <select id="next-team" onchange="updateUI()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
+                        <option value="tesoreria">Tesorería (Validación de Fondos)</option>
+                        <option value="finops">FinOps (Modelado Contable)</option>
+                        <option value="contabilidad">Contabilidad (SAP & Cuentas T)</option>
+                        <option value="ledger">Tech Ledger (Implementación)</option>
+                        <option value="infosec">InfoSec (Auditoría e Inmutabilidad)</option>
+                    </select>
+                </div>
+
+                <button class="btn-submit" onclick="triggerFirebase()">
+                    Confirmar Datos y Delegar al Equipo
+                </button>
+                <div class="audit-note">
+                    * Esta acción creará un registro inmutable en el historial del proyecto.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuración de campos por equipo (Esto vendría de tu Firestore)
+    const teamConfigs = {
+        tesoreria: {
+            instruction: "Valide las cuentas puente y el CIF del tercero para el recaudo.",
+            fields: [
+                { label: "CIF/NIF Tercero", type: "text", placeholder: "800.xxx.xxx-x", key: "cif" },
+                { label: "Tipo de Depósito", type: "text", placeholder: "VISTA_RECAUDO", key: "dep_type" },
+                { label: "Banco Liquidador", type: "text", placeholder: "Nombre del Banco", key: "bank" }
+            ]
+        },
+        finops: {
+            instruction: "Defina la estructura de costos y beneficios para SAP.",
+            fields: [
+                { label: "Centro de Costo (CECO)", type: "text", placeholder: "CC_XXXX", key: "ceco" },
+                { label: "Centro de Beneficio (CEBE)", type: "text", placeholder: "CB_XXXX", key: "cebe" },
+                { label: "Estructura de Comisiones", type: "text", placeholder: "% o Flat Fee", key: "fees" }
+            ]
+        },
+        contabilidad: {
+            instruction: "Asigne códigos Journal y configuración impositiva.",
+            fields: [
+                { label: "Journal Code SAP", type: "text", placeholder: "AS01", key: "sap_code" },
+                { label: "Regla de Impuestos", type: "text", placeholder: "IVA 19% / Exento", key: "tax_rule" },
+                { label: "Cuenta T (Débito)", type: "text", placeholder: "1105XXXX", key: "t_debit" },
+                { label: "Cuenta T (Crédito)", type: "text", placeholder: "2105XXXX", key: "t_credit" }
+            ]
+        },
+        ledger: {
+            instruction: "Parámetros técnicos para la implementación en el motor contable.",
+            fields: [
+                { label: "Endpoint de Notificación", type: "text", placeholder: "https://api.ledger...", key: "endpoint" },
+                { label: "Frecuencia de Conciliación", type: "text", placeholder: "Real-time / Batch", key: "sync_freq" }
+            ]
+        },
+        infosec: {
+            instruction: "Verificación de seguridad y firma de inmutabilidad.",
+            fields: [
+                { label: "Algoritmo de Hash", type: "text", placeholder: "SHA-256", key: "hash" },
+                { label: "Nivel de Encriptación", type: "text", placeholder: "AES-256", key: "encryption" }
+            ]
         }
-    </script>
+    };
+
+    function updateUI() {
+        const team = document.getElementById('next-team').value;
+        const config = teamConfigs[team];
+        
+        // Actualizar Instrucción
+        document.getElementById('step-instruction').innerText = config.instruction;
+        
+        // Renderizar Campos Dinámicos
+        const container = document.getElementById('dynamic-fields');
+        container.innerHTML = ''; // Limpiar
+        
+        config.fields.forEach(f => {
+            const group = document.createElement('div');
+            group.className = 'field-group';
+            group.innerHTML = `
+                <label>${f.label}</label>
+                <input type="${f.type}" placeholder="${f.placeholder}" data-key="${f.key}">
+            `;
+            container.appendChild(group);
+        });
+    }
+
+    function triggerFirebase() {
+        const team = document.getElementById('next-team').value;
+        const inputs = document.querySelectorAll('#dynamic-fields input');
+        const data = {};
+        
+        inputs.forEach(i => data[i.dataset.key] = i.value);
+
+        // Aquí conectarías con Firebase
+        console.log("LOG: Enviando a Firebase...");
+        console.log("Hacia equipo:", team);
+        console.log("Datos técnicos:", data);
+
+        alert(`PROCESO DISRUPTIVO: Datos enviados. El equipo de ${team.toUpperCase()} ha recibido la estafeta.`);
+    }
+
+    // Inicializar la primera vista
+    updateUI();
+</script>
+
 </body>
 </html>
