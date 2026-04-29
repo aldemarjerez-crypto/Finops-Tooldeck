@@ -39,4 +39,118 @@
 
         /* Barra de progreso de actividades */
         .activity-track { margin-top: 20px; display: flex; gap: 10px; }
-        .act-node { flex: 1; height: 6px; background: #e2e8
+        .act-node { flex: 1; height: 6px; background: #e2e8f0; border-radius: 10px; position: relative; }
+        .act-node.done { background: var(--success); }
+        .act-node.active { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+        .act-label { position: absolute; top: 12px; font-size: 9px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+
+        .btn-handoff { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-handoff:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>Centro de Mando Ledger</h1>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">Gestión de 24 Iniciativas Activas</p>
+        </div>
+        <div style="text-align: right;">
+            <span style="font-size: 12px; font-weight: 700;">RIESGO GLOBAL</span>
+            <div style="background: white; color: var(--primary); padding: 5px 15px; border-radius: 20px; font-weight: 800; margin-top: 5px;">BAJO (92% Confianza)</div>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <span class="stat-label">Carga Contabilidad</span>
+            <span class="stat-value" style="color: var(--orange);">92% 🔥</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Carga Tech Ledger</span>
+            <span class="stat-value" style="color: var(--primary);">65%</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Bloqueos de Datos</span>
+            <span class="stat-value" style="color: var(--orange);">07</span>
+        </div>
+        <div class="stat-card" style="border-color: var(--success);">
+            <span class="stat-label">Previsión Go-Live (7d)</span>
+            <span class="stat-value" style="color: var(--success);">03</span>
+        </div>
+    </div>
+
+    <div class="initiative-card">
+        <div class="card-top">
+            <div>
+                <span class="tag-status" style="background: #fee2e2; color: #b91c1c;">⚠️ BLOQUEADO POR DATOS</span>
+                <h2 style="margin: 10px 0 5px 0; font-size: 20px;">Cash-In: Grandes Montos (Banco de Bogotá)</h2>
+                <p style="margin: 0; color: var(--muted); font-size: 14px;">Iniciativa para habilitar recaudo institucional > 100M</p>
+            </div>
+            <button class="btn-handoff">NOTIFICAR BLOQUEO</button>
+        </div>
+
+        <div class="variables-grid">
+            <div class="var-item">
+                <span class="var-label">Cuenta Corriente (BdB)</span>
+                <span class="var-value">210-98765-43-0</span>
+            </div>
+            <div class="var-item">
+                <span class="var-label">Journal Code SAP</span>
+                <span class="var-value var-empty">MISSING_DATA</span>
+            </div>
+            <div class="var-item">
+                <span class="var-label">Centro de Costo</span>
+                <span class="var-value">CECO_RECAUDO_01</span>
+            </div>
+            <div class="var-item">
+                <span class="var-label">Centro de Beneficio</span>
+                <span class="var-value var-empty">MISSING_DATA</span>
+            </div>
+            <div class="var-item">
+                <span class="var-label">Config. Impuestos</span>
+                <span class="var-value">IVA_EXENTO_GMF</span>
+            </div>
+        </div>
+
+        <div class="activity-track">
+            <div class="act-node done"><span class="act-label">CONTRATO</span></div>
+            <div class="act-node done"><span class="act-label">FLUJO DINERO</span></div>
+            <div class="act-node done"><span class="act-label">CUENTA BANCARIA</span></div>
+            <div class="act-node active"><span class="act-label">ASIGNACIÓN SAP</span></div>
+            <div class="act-node"><span class="act-label">TAX REVIEW</span></div>
+            <div class="act-node"><span class="act-label">LEDGER EVENTS</span></div>
+            <div class="act-node"><span class="act-label">SANDBOX TEST</span></div>
+        </div>
+    </div>
+
+    <div class="initiative-card" style="opacity: 0.8;">
+        <div class="card-top">
+            <div>
+                <span class="tag-status" style="background: #dcfce7; color: #166534;">● EN CURSO (FLUIDO)</span>
+                <h2 style="margin: 10px 0 5px 0; font-size: 20px;">Crypto Lending: Retail v1</h2>
+                <p style="margin: 0; color: var(--muted); font-size: 14px;">Producto de préstamos colateralizados en BTC</p>
+            </div>
+            <button class="btn-handoff" style="background: var(--success);">VER MAPA MENTAL</button>
+        </div>
+
+        <div class="variables-grid">
+            <div class="var-item">
+                <span class="var-label">LTV Config</span>
+                <span class="var-value">60% MAX</span>
+            </div>
+            <div class="var-item">
+                <span class="var-label">Vault Address</span>
+                <span class="var-value">bc1qxy2kg...</span>
+            </div>
+            <div class="var-item">
+                <span class="var-label">SAP Code</span>
+                <span class="var-value">CRYP-001</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
