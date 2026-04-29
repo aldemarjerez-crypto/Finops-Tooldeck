@@ -2,225 +2,148 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fintech Command Center | Ledger OS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Ledger Sync | Clean & Vibrant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #050a1a; 
-            --card: #111827; 
-            --accent: #3b82f6; 
-            --cyan: #06b6d4;
-            --success: #10b981; 
-            --warning: #f59e0b; 
-            --danger: #ef4444;
-            --text-muted: #9ca3af;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --primary: #4338ca; /* Azul eléctrico */
+            --warm: #f97316;    /* Naranja vibrante */
+            --success: #10b981; /* Verde menta */
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
         }
-
         body { 
-            font-family: 'Poppins', sans-serif; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
             background: var(--bg); 
-            color: white; 
+            color: var(--text); 
             margin: 0; 
-            padding: 20px; 
-            font-size: 13px; 
+            padding: 40px; 
+            -webkit-font-smoothing: antialiased;
         }
         
-        .grid-master { 
-            display: grid; 
-            grid-template-columns: 300px 1fr; 
-            gap: 25px; 
-            max-width: 1400px; 
-            margin: 0 auto; 
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        /* Header con aire */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 60px; }
+        .header h1 { font-size: 28px; font-weight: 700; color: var(--primary); margin: 0; letter-spacing: -1px; }
+        .date { font-size: 14px; color: var(--muted); font-weight: 600; }
+
+        /* Stats con colores cálidos */
+        .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 60px; }
+        .stat-card { 
+            background: var(--card); 
+            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border-bottom: 4px solid var(--border);
         }
-        
-        /* Alerta de Colisión Crítica */
-        .collision-banner {
-            grid-column: 1 / -1;
-            background: linear-gradient(90deg, #7f1d1d, var(--danger));
-            padding: 15px 25px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
+        .stat-num { font-size: 32px; font-weight: 700; display: block; margin-bottom: 5px; }
+        .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        /* Lista de Iniciativas */
+        .section-title { font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 25px; display: block; }
+        .project-card { 
+            background: var(--card); 
+            padding: 25px 35px; 
+            border-radius: 24px; 
+            display: flex; 
+            justify-content: space-between; 
             align-items: center;
-            margin-bottom: 10px;
-            border: 1px solid rgba(255,255,255,0.2);
-            animation: pulse-danger 2s infinite;
+            margin-bottom: 16px; 
+            transition: all 0.3s ease; 
+            border: 1px solid var(--border);
         }
+        .project-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: var(--primary); }
+        
+        .info-main { display: flex; align-items: center; gap: 20px; }
+        .indicator { width: 12px; height: 12px; border-radius: 4px; }
+        
+        .project-title { font-size: 16px; font-weight: 700; display: block; color: var(--text); }
+        .project-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-        @keyframes pulse-danger {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        /* Botones Vibrantes */
+        .btn-action { 
+            background: #eff6ff; 
+            color: var(--primary); 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            font-size: 12px; 
+            cursor: pointer; 
+            transition: 0.2s;
         }
+        .btn-action:hover { background: var(--primary); color: white; }
 
-        /* Sidebar: Capacidad y Recursos */
-        .sidebar { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #1f2937; height: fit-content; }
-        .sidebar h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin: 0 0 20px 0; border-bottom: 1px solid #1f2937; padding-bottom: 10px; }
-        
-        .team-status { margin-bottom: 25px; }
-        .team-info { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; font-weight: 600; }
-        .load-bar { background: #1f2937; height: 8px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-        .load-fill { height: 100%; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-block { background: #fff7ed; color: var(--warm); }
+        .btn-block:hover { background: var(--warm); color: white; }
 
-        /* Main Dashboard */
-        .main-view { display: flex; flex-direction: column; gap: 20px; }
-        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .mini-card { background: var(--card); padding: 20px; border-radius: 18px; border: 1px solid #1f2937; position: relative; overflow: hidden; }
-        .mini-card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
-        
-        /* Tabla de Slots de Despliegue */
-        .slot-container { background: var(--card); border-radius: 20px; border: 1px solid #1f2937; padding: 20px; margin-top: 10px; }
-        .slot-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .slot-table th { text-align: left; color: var(--text-muted); padding: 10px; font-size: 10px; text-transform: uppercase; border-bottom: 1px solid #1f2937; }
-        .slot-table td { padding: 15px 10px; border-bottom: 1px solid #1f2937; }
-        .slot-time { font-family: 'JetBrains Mono', monospace; color: var(--cyan); font-weight: bold; }
+        /* Badge de Tag */
+        .tag { font-size: 10px; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-weight: 700; margin-left: 10px; vertical-align: middle; }
 
-        /* Filas de Iniciativas */
-        .initiative-row { 
-            background: #111827; padding: 18px 25px; border-radius: 15px; 
-            display: grid; grid-template-columns: 1.5fr 1fr 1fr 100px; 
-            align-items: center; margin-bottom: 12px; border: 1px solid #1f2937;
-            transition: 0.3s;
-        }
-        .initiative-row:hover { background: #1a2233; border-color: var(--accent); transform: translateX(5px); }
-        
-        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; display: inline-block; }
-        .btn-action { background: transparent; border: 1px solid #374151; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 10px; transition: 0.2s; }
-        .btn-action:hover { background: var(--accent); border-color: var(--accent); }
-
-        .badge-risk { font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-left: 10px; }
     </style>
 </head>
 <body>
 
-<div class="grid-master">
-    <div class="collision-banner">
-        <div>
-            <strong style="font-size: 16px;">🚨 CRITICAL DEPLOYMENT OVERLOAD</strong>
-            <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;">Se detectaron 10 iniciativas para hoy. Aplicando slots de seguridad para prevenir incidentes en Ledger.</p>
+    <div class="container">
+        <div class="header">
+            <h1>LedgerSync Portafolio</h1>
+            <div class="date">Martes, 28 de Abril</div>
         </div>
-        <div style="text-align: right;">
-            <button class="btn-action" style="background: white; color: var(--danger); font-weight: bold; border: none;">REVISAR SLOTS</button>
+
+        <div class="summary">
+            <div class="stat-card" style="border-color: var(--primary);">
+                <span class="stat-num" style="color: var(--primary);">24</span>
+                <span class="stat-label">Iniciativas</span>
+            </div>
+            <div class="stat-card" style="border-color: var(--warm);">
+                <span class="stat-num" style="color: var(--warm);">07</span>
+                <span class="stat-label">Bloqueos</span>
+            </div>
+            <div class="stat-card" style="border-color: var(--success);">
+                <span class="stat-num" style="color: var(--success);">03</span>
+                <span class="stat-label">Go-Live Hoy</span>
+            </div>
+        </div>
+
+        <span class="section-title">Prioridad de Atención</span>
+        
+        <div class="project-card">
+            <div class="info-main">
+                <div class="indicator" style="background: var(--warm);"></div>
+                <div>
+                    <span class="project-title">Cash-In: Grandes Montos <span class="tag">BdB</span></span>
+                    <div class="project-meta">Bloqueado por <strong>Contabilidad</strong> • Falta Journal Code SAP</div>
+                </div>
+            </div>
+            <button class="btn-action btn-block">Resolver Bloqueo</button>
+        </div>
+
+        <div class="project-card">
+            <div class="info-main">
+                <div class="indicator" style="background: var(--primary);"></div>
+                <div>
+                    <span class="project-title">Crypto-Lending v2 <span class="tag">BTC/ETH</span></span>
+                    <div class="project-meta">En curso • Pruebas de <strong>Ledger Events</strong> en Sandbox</div>
+                </div>
+            </div>
+            <button class="btn-action">Ver Mapa Mental</button>
+        </div>
+
+        <div class="project-card">
+            <div class="info-main">
+                <div class="indicator" style="background: var(--success);"></div>
+                <div>
+                    <span class="project-title">Payouts: Amazon Merchants <span class="tag">USD</span></span>
+                    <div class="project-meta">Finalizado • Esperando ventana de <strong>Despliegue</strong></div>
+                </div>
+            </div>
+            <button class="btn-action">Detalles de Salida</button>
         </div>
     </div>
-
-    <aside class="sidebar">
-        <h2>Carga de Equipos</h2>
-        
-        <div class="team-status">
-            <div class="team-info"><span>Contabilidad / SAP</span> <span style="color:var(--danger)">92% 🔥</span></div>
-            <div class="load-bar"><div class="load-fill" style="width: 92%; background: var(--danger);"></div></div>
-        </div>
-        
-        <div class="team-status">
-            <div class="team-info"><span>InfoSec & Compliance</span> <span>35%</span></div>
-            <div class="load-bar"><div class="load-fill" style="width: 35%; background: var(--success);"></div></div>
-        </div>
-
-        <div class="team-status">
-            <div class="team-info"><span>Tech Ledger (Events)</span> <span style="color:var(--warning)">78%</span></div>
-            <div class="load-bar"><div class="load-fill" style="width: 78%; background: var(--warning);"></div></div>
-        </div>
-
-        <div class="team-status" style="margin-top: 40px;">
-            <h2>Dependencias Críticas</h2>
-            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
-                <p style="margin:0; font-size: 11px;">⚠️ <strong>SAP Journal Sync:</strong> 4 iniciativas esperando por asignación de cuentas en Sandbox.</p>
-            </div>
-        </div>
-    </aside>
-
-    <main class="main-view">
-        <div class="stat-grid">
-            <div class="mini-card" style="border-left: 4px solid var(--accent);">
-                <span style="font-size: 10px; color: var(--text-muted); font-weight: bold;">PORTAFOLIO ACTIVO</span>
-                <div style="font-size: 28px; font-weight: 700; margin-top: 5px;">24 <small style="font-size: 12px; font-weight: normal; color: var(--text-muted);">Iniciativas</small></div>
-            </div>
-            <div class="mini-card" style="border-left: 4px solid var(--danger);">
-                <span style="font-size: 10px; color: var(--text-muted); font-weight: bold;">BLOQUEOS TÉCNICOS</span>
-                <div style="font-size: 28px; font-weight: 700; margin-top: 5px; color: var(--danger);">07 <small style="font-size: 12px; font-weight: normal; color: var(--text-muted);">Críticos</small></div>
-            </div>
-            <div class="mini-card" style="border-left: 4px solid var(--cyan);">
-                <span style="font-size: 10px; color: var(--text-muted); font-weight: bold;">VENTANA GO-LIVE</span>
-                <div style="font-size: 28px; font-weight: 700; margin-top: 5px; color: var(--cyan);">10 <small style="font-size: 12px; font-weight: normal; color: var(--text-muted);">Today</small></div>
-            </div>
-        </div>
-
-        <div class="slot-container">
-            <h2 style="font-size: 14px; margin-bottom: 15px; color: var(--cyan);">🕒 Staged Deployment Plan (Today)</h2>
-            <table class="slot-table">
-                <thead>
-                    <tr>
-                        <th>Slot Time</th>
-                        <th>Iniciativa</th>
-                        <th>Responsable</th>
-                        <th>Riesgo</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="slot-time">01:00 AM</td>
-                        <td>Cash-In: BdB (Grandes Montos)</td>
-                        <td>FinOps / Ops</td>
-                        <td><span class="badge-risk" style="background: rgba(245,158,11,0.2); color: var(--warning);">MEDIUM</span></td>
-                        <td><span class="status-pill" style="background: var(--success); color: white;">SUCCESS</span></td>
-                    </tr>
-                    <tr>
-                        <td class="slot-time">02:30 AM</td>
-                        <td>Crypto-Lending v2: Core Sync</td>
-                        <td>Ledger Team</td>
-                        <td><span class="badge-risk" style="background: rgba(239,68,68,0.2); color: var(--danger);">CRITICAL</span></td>
-                        <td><button class="btn-action">EJECUTAR</button></td>
-                    </tr>
-                    <tr>
-                        <td class="slot-time">04:00 AM</td>
-                        <td>Payouts Ind: Retail flow</td>
-                        <td>Producto</td>
-                        <td><span class="badge-risk" style="background: rgba(16,185,129,0.2); color: var(--success);">LOW</span></td>
-                        <td><span class="status-pill" style="background: #374151; color: var(--text-muted);">QUEUED</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h2 style="font-size: 16px; margin-top: 20px;">Radar de Portafolio (Iniciativas)</h2>
-        
-        <div class="initiative-row">
-            <div>
-                <strong>BdB Cash-In (Retail Branch)</strong><br>
-                <small style="color: var(--text-muted);">Estado: Esperando SAP Codes</small>
-            </div>
-            <div style="text-align: center;">
-                <span class="status-pill" style="border: 1px solid var(--danger); color: var(--danger);">BLOCKED</span>
-            </div>
-            <div style="padding: 0 20px;">
-                <div class="load-bar"><div class="load-fill" style="width: 65%; background: var(--accent);"></div></div>
-            </div>
-            <div style="text-align: right;">
-                <button class="btn-action">VER MAPA</button>
-            </div>
-        </div>
-
-        <div class="initiative-row" style="border-left: 4px solid var(--success);">
-            <div>
-                <strong>Intereses Diarios: Engine Up</strong><br>
-                <small style="color: var(--text-muted);">Estado: Certificando Sandbox</small>
-            </div>
-            <div style="text-align: center;">
-                <span class="status-pill" style="border: 1px solid var(--success); color: var(--success);">TESTING</span>
-            </div>
-            <div style="padding: 0 20px;">
-                <div class="load-bar"><div class="load-fill" style="width: 90%; background: var(--success);"></div></div>
-            </div>
-            <div style="text-align: right;">
-                <button class="btn-action">VER MAPA</button>
-            </div>
-        </div>
-
-    </main>
-</div>
 
 </body>
 </html>
