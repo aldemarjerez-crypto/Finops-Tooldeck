@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bold - Hub de Modelos e Iteración</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .table-asiento th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .tab-active { border-bottom: 3px solid #1d4ed8; color: #1d4ed8; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans">
+
+    <nav class="bg-slate-900 text-white p-4 shadow-lg">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tight">BOLD <span class="text-blue-400">FINOPS</span></h1>
+            <span class="text-xs bg-blue-500 px-2 py-1 rounded">Versión 2.1 - Iterativa</span>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-6">
+        
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold text-slate-800">Calculadora de Impacto Contable</h2>
+            <p class="text-slate-500">Selecciona un canal para iterar el modelo y ver el asiento automático.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-lg mb-4 flex items-center">
+                    <span class="mr-2">⚙️</span> Parámetros de Entrada
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Producto / Canal</label>
+                        <select id="canal" class="mt-1 block w-full p-2 bg-slate-50 border border-slate-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onchange="calcular()">
+                            <option value="pse">PSE (Cash-In)</option>
+                            <option value="ach">ACH Interbancaria (Cash-In)</option>
+                            <option value="servibanca">Servibanca (Cash-Out)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Monto de la Transacción</label>
+                        <input type="number" id="monto" value="1000000" class="mt-1 block w-full p-2 bg-slate-50 border border-slate-300 rounded-md focus:ring-blue-500 focus:border-blue-500" oninput="calcular()">
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100">
+                        <label class="block text-sm font-medium text-slate-700">Comisión Pasarela (%)</label>
+                        <input type="number" id="comision_pct" value="2.5" step="0.1" class="mt-1 block w-full p-2 bg-slate-50 border border-slate-300 rounded-md" oninput="calcular()">
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-xs text-blue-700 font-semibold italic">
+                        "Itera las cuentas aquí para probar nuevos modelos antes de pasarlos al Excel maestro."
+                    </p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-600">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-lg">Asiento Contable Generado</h3>
+                    <button onclick="window.print()" class="text-sm text-blue-600 hover:underline">Imprimir Soporte</button>
+                </div>
+
+                <table class="w-full text-left border-collapse table-asiento">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600">
+                            <th class="p-3 border-b">Cuenta</th>
+                            <th class="p-3 border-b">Descripción</th>
+                            <th class="p-3 border-b text-right">Débito</th>
+                            <th class="p-3 border-b text-right">Crédito</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body">
+                        </tbody>
+                    <tfoot>
+                        <tr class="bg-slate-100 font-bold">
+                            <td colspan="2" class="p-3 text-right">TOTALES</td>
+                            <td id="total-debito" class="p-3 text-right text-green-700"></td>
+                            <td id="total-credito" class="p-3 text-right text-blue-700"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div id="validacion" class="mt-4 p-2 text-center text-xs font-bold rounded uppercase tracking-widest">
+                    </div>
+            </div>
+        </div>
+
+        <section class="mt-12">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">Repositorio de Modelos (V2.1)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <a href="#" class="p-4 bg-white border border-slate-200 rounded-lg hover:shadow-md transition">
+                    <span class="block font-bold">📄 Ver Excel Maestro</span>
+                    <span class="text-slate-500">Enlace directo a Google Drive</span>
+                </a>
+                <a href="#" class="p-4 bg-white border border-slate-200 rounded-lg hover:shadow-md transition">
+                    <span class="block font-bold">🛠 Diccionario de Cuentas</span>
+                    <span class="text-slate-500">Definición de dinámicas 2105, 1105...</span>
+                </a>
+                <a href="#" class="p-4 bg-white border border-slate-200 rounded-lg hover:shadow-md transition">
+                    <span class="block font-bold">🔄 Historial de Iteraciones</span>
+                    <span class="text-slate-500">Log de cambios en modelos contables</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function calcular() {
+            const monto = parseFloat(document.getElementById('monto').value) || 0;
+            const pct = parseFloat(document.getElementById('comision_pct').value) || 0;
+            const canal = document.getElementById('canal').value;
+            const comisionVal = monto * (pct / 100);
+            const neto = monto - comisionVal;
+
+            let filas = "";
+            let tDebito = 0;
+            let tCredito = 0;
+
+            if (canal === "pse" || canal === "ach") {
+                // Modelo Cash-In
+                const ctaBanco = canal === "pse" ? "110505 (Pasarela)" : "111005 (Bancos)";
+                
+                filas = `
+                    <tr>
+                        <td class="p-3 border-b text-slate-600">${ctaBanco}</td>
+                        <td class="p-3 border-b italic">Entrada de dinero neta</td>
+                        <td class="p-3 border-b text-right">$ ${neto.toLocaleString()}</td>
+                        <td class="p-3 border-b text-right">-</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 border-b text-slate-600">5105XX (Gasto)</td>
+                        <td class="p-3 border-b italic">Comisión por transacción</td>
+                        <td class="p-3 border-b text-right">$ ${comisionVal.toLocaleString()}</td>
+                        <td class="p-3 border-b text-right">-</td>
+                    </tr>
+                    <tr class="bg-blue-50">
+                        <td class="p-3 border-b text-slate-800 font-bold">210505 (Depósitos)</td>
+                        <td class="p-3 border-b italic">Abono a cuenta de usuario</td>
+                        <td class="p-3 border-b text-right">-</td>
+                        <td class="p-3 border-b text-right font-bold">$ ${monto.toLocaleString()}</td>
+                    </tr>
+                `;
+                tDebito = neto + comisionVal;
+                tCredito = monto;
+            } else {
+                // Modelo Servibanca (Cash-Out)
+                filas = `
+                    <tr class="bg-red-50">
+                        <td class="p-3 border-b text-slate-800 font-bold">210505 (Depósitos)</td>
+                        <td class="p-3 border-b italic">Débito por retiro ATM</td>
+                        <td class="p-3 border-b text-right font-bold">$ ${monto.toLocaleString()}</td>
+                        <td class="p-3 border-b text-right">-</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 border-b text-slate-600">111005 (Bancos)</td>
+                        <td class="p-3 border-b italic">Fondeo de red Servibanca</td>
+                        <td class="p-3 border-b text-right">-</td>
+                        <td class="p-3 border-b text-right">$ ${monto.toLocaleString()}</td>
+                    </tr>
+                `;
+                tDebito = monto;
+                tCredito = monto;
+            }
+
+            document.getElementById('tabla-body').innerHTML = filas;
+            document.getElementById('total-debito').innerText = "$ " + tDebito.toLocaleString();
+            document.getElementById('total-credito').innerText = "$ " + tCredito.toLocaleString();
+
+            const validacion = document.getElementById('validacion');
+            if (tDebito === tCredito && tDebito > 0) {
+                validacion.innerText = "✅ Partida Doble Cuadrada";
+                validacion.className = "mt-4 p-2 text-center text-xs font-bold rounded uppercase tracking-widest bg-green-100 text-green-700";
+            } else {
+                validacion.innerText = "❌ Descuadre Detectado";
+                validacion.className = "mt-4 p-2 text-center text-xs font-bold rounded uppercase tracking-widest bg-red-100 text-red-700";
+            }
+        }
+
+        // Ejecutar por primera vez
+        calcular();
+    </script>
+</body>
+</html>
